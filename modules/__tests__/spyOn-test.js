@@ -23,18 +23,53 @@ describe('A function that was spied on', () => {
     expect(spy.calls[0].arguments).toEqual([ 'some', 'args' ])
   })
 
-  it('was called', () => {
-    expect(spy).toHaveBeenCalled()
-  })
-
-  it('was called with the correct args', () => {
-    expect(spy).toHaveBeenCalledWith('some', 'args')
-  })
-
   it('can be restored', () => {
     expect(video.play).toEqual(spy)
     spy.restore()
     expect(video.play).toNotEqual(spy)
+  })
+})
+
+describe('toHaveBeenCalled', () => {
+  let spy
+  beforeEach(() => {
+    spy = expect.createSpy()
+  })
+
+  it('does not throw when the spy was called', () => {
+    spy()
+    expect(spy).toHaveBeenCalled()
+  })
+
+  it('throws when the spy was not called', () => {
+    expect(()=>{
+      expect(spy).toHaveBeenCalled()
+    }).toThrow('spy was not called')
+  })
+})
+
+describe('toHaveBeenCalledWith', () => {
+  let spy
+  beforeEach(() => {
+    spy = expect.createSpy()
+  })
+
+  it('does not throw when the spy was called with those arguments', () => {
+    spy('some', 'args')
+    expect(spy).toHaveBeenCalledWith('some', 'args')
+  })
+
+  it('throws when the spy was not called', () => {
+    expect(()=>{
+      expect(spy).toHaveBeenCalledWith('some', 'args')
+    }).toThrow(/spy was not called/)
+  })
+
+  it('throws when the spy was called with other args', () => {
+    spy('other', 'args')
+    expect(()=>{
+      expect(spy).toHaveBeenCalledWith('some', 'args')
+    }).toThrow("spy was not called with [ 'some', 'args' ], but was called with [ [ 'other', 'args' ] ]")
   })
 })
 

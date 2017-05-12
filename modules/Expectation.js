@@ -461,9 +461,15 @@ class Expectation {
     )
 
     assert(
+      spy.calls.length > 0,
+      'spy was not called'
+    )
+
+    assert(
       spy.calls.some(call => isEqual(call.arguments, expectedArgs)),
-      'spy was never called with %s',
-      expectedArgs
+      'spy was not called with %s, but was called with %s',
+      expectedArgs,
+      spy.calls.map(call => call.arguments)
     )
 
     return this
