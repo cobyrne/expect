@@ -48,6 +48,19 @@ export const isA = (object, value) => {
 }
 
 /**
+ * Returns the thrown exception or null
+ */
+export const catchThrown = (fn, context, args) => {
+  try {
+    fn.apply(context, args)
+  } catch (error) {
+    return error
+  }
+
+  return null
+}
+
+/**
  * Returns true if the given function throws the given value
  * when invoked. The value may be:
  *
@@ -56,28 +69,22 @@ export const isA = (object, value) => {
  * - a regular expression, to compare with the error message
  * - a string, to find in the error message
  */
-export const functionThrows = (fn, context, args, value) => {
-  try {
-    fn.apply(context, args)
-  } catch (error) {
-    if (value == null)
+export const matchThrown = (error, value) => {
+  if (value == null)
+    return true
+
+  if (isFunction(value) && error instanceof value)
+    return true
+
+  const message = error.message || error
+
+  if (typeof message === 'string') {
+    if (isRegExp(value) && value.test(error.message))
       return true
 
-    if (isFunction(value) && error instanceof value)
+    if (typeof value === 'string' && message.indexOf(value) !== -1)
       return true
-
-    const message = error.message || error
-
-    if (typeof message === 'string') {
-      if (isRegExp(value) && value.test(error.message))
-        return true
-
-      if (typeof value === 'string' && message.indexOf(value) !== -1)
-        return true
-    }
   }
-
-  return false
 }
 
 /**

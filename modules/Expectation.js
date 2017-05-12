@@ -8,7 +8,8 @@ import {
   isArray,
   isEqual,
   isObject,
-  functionThrows,
+  catchThrown,
+  matchThrown,
   arrayContains,
   objectContains,
   stringContains
@@ -108,11 +109,20 @@ class Expectation {
       this.actual
     )
 
+    const thrown = catchThrown(this.actual, this.context, this.args)
+
     assert(
-      functionThrows(this.actual, this.context, this.args, value),
-      (message || 'Expected %s to throw %s'),
+      thrown !== null,
+      (message || 'Expected %s to throw an error'),
+      this.actual
+    )
+
+    assert(
+      matchThrown(thrown, value),
+      (message || 'Expected %s to throw %s. Actually threw %s'),
       this.actual,
-      value || 'an error'
+      value,
+      thrown.message
     )
 
     return this
@@ -125,12 +135,23 @@ class Expectation {
       this.actual
     )
 
-    assert(
-      !functionThrows(this.actual, this.context, this.args, value),
-      (message || 'Expected %s to not throw %s'),
-      this.actual,
-      value || 'an error'
-    )
+    const thrown = catchThrown(this.actual, this.context, this.args)
+
+    if (value) {
+      assert(
+        thrown == null || !matchThrown(thrown, value),
+        (message || 'Expected %s to not throw %s'),
+        this.actual,
+        value
+      )
+    } else {
+      assert(
+        thrown == null,
+        (message || 'Expected %s to not throw an error. Actually threw %s'),
+        this.actual,
+        thrown && thrown.message
+      )
+    }
 
     return this
   }
